@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>پنل مجری</title>
+  <style>
+    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0}
+    .wrap{max-width:560px;margin:0 auto;padding:16px}
+    .card{background:#1b1f3d;border-radius:14px;padding:16px;margin:12px 0}
+    select,button{width:100%;padding:14px;border-radius:12px;border:0;font-size:1rem;margin-top:8px}
+    button{background:#ff4f8b;color:#fff;cursor:pointer}
+    a{color:#7dd3fc}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>پنل مجری</h2>
+  <form method="post" class="card">
+    {% csrf_token %}
+    <b>ساخت مسابقه‌ی جدید</b>
+    <select name="quiz" required>
+      {% for q in quizzes %}<option value="{{ q.id }}">{{ q.title }}</option>{% endfor %}
+    </select>
+    <button type="submit">ساخت Session و رفتن به پنل</button>
+  </form>
+  <div class="card">
+    <b>Sessionهای باز</b>
+    <ul>
+      {% for s in sessions %}
+        <li><a href="{% url 'contest:host' s.code %}">{{ s.quiz.title }} - {{ s.code }}</a></li>
+      {% empty %}
+        <li>هیچی نیست.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+</body>
+</html>

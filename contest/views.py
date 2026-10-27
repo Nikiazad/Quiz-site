@@ -1,12 +1,15 @@
 import json
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .models import Answer, Player, Session
+from .models import Answer, Player, Quiz, Session
 
 MAX_POINTS = 1000
 
@@ -49,7 +52,7 @@ def state(request, code):
         data["question"]["my_option"] = mine.option_id if mine else None
         if revealing and mine:
             data["question"]["my_points"] = mine.points
-            
+
         if revealing:
             data["question"]["explanation"] = q.explanation
     return JsonResponse(data)
@@ -117,3 +120,62 @@ def answer(request, code):
     except IntegrityError:
         return JsonResponse({"error": "already_answered"}, status=409)
     return JsonResponse({"ok": True})
+
+
+@staff_member_required
+def host_home(request):
+    if request.method == "POST":
+        quiz = get_object_or_404(Quiz, pk=request.POST.get("quiz"))
+        session = Session.objects.create(quiz=quiz)
+        return redirect("contest:host", code=session.code)
+    return render(request, "contest/host_home.html", {
+        "quizzes": Quiz.objects.all(),
+        "sessions": Session.objects.exclude(phase=Session.FINISHED).order_by("-created_at")[:10],
+    })
+
+
+@staff_member_required
+def host(request, code):
+    session = get_object_or_404(Session, code=code)
+    questions = list(session.quiz.questions.all())
+    ids = [q.id for q in questions]
+    current_no = ids.index(session.current_question_id) + 1 if session.current_question_id in ids else 0
+    answered = 0
+    if session.current_question_id:
+        answered = Answer.objects.filter(
+            question_id=session.current_question_id, player__session=session
+        ).count()
+    return render(request, "contest/host.html", {
+        "session": session,
+        "total": len(questions),
+        "current_no": current_no,
+        "players": session.players.count(),
+        "answered": answered,
+        "join_url": request.build_absolute_uri(reverse("contest:join")) + "?code=" + session.code,
+    })
+
+
+@staff_member_required
+@require_POST
+def host_action(request, code):
+    session = get_object_or_404(Session, code=code)
+    action = request.POST.get("action")
+    questions = list(session.quiz.questions.all())
+    ids = [q.id for q in questions]
+
+    if action == "start" and session.phase in (Session.LOBBY, Session.REVEAL, Session.BOARD):
+        idx = ids.index(session.current_question_id) + 1 if session.current_question_id in ids else 0
+        if idx < len(questions):
+            session.current_question = questions[idx]
+            session.phase = Session.QUESTION
+            session.question_started_at = timezone.now()
+        else:
+            session.phase = Session.FINISHED
+    elif action == "reveal" and session.phase == Session.QUESTION:
+        session.phase = Session.REVEAL
+    elif action == "board" and session.phase == Session.REVEAL:
+        session.phase = Session.BOARD
+    elif action == "finish":
+        session.phase = Session.FINISHED
+    session.save()
+    return redirect("contest:host", code=session.code)
