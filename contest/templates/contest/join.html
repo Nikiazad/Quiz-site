@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ورود به مسابقه</title>
+  <style>
+    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0;display:grid;place-items:center;min-height:100vh}
+    .card{background:#1b1f3d;padding:24px;border-radius:16px;width:min(92vw,380px);text-align:center}
+    input{width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border-radius:10px;border:2px solid #343a7a;background:#12163a;color:#fff;font-size:1rem}
+    button{width:100%;padding:14px;border:0;border-radius:12px;background:#ff4f8b;color:#fff;font-size:1.1rem;cursor:pointer}
+    .err{color:#ff8a8a}
+  </style>
+</head>
+<body>
+  <form method="post" class="card">
+    {% csrf_token %}
+    <h2>ورود به مسابقه</h2>
+    {% if error %}<p class="err">{{ error }}</p>{% endif %}
+    <input name="code" placeholder="کد ۶ رقمی" inputmode="numeric" maxlength="6" value="{{ request.GET.code }}" required>
+    <input name="name" placeholder="اسم یا نام مستعار" maxlength="40" required>
+    <button type="submit">ورود</button>
+  </form>
+</body>
+</html>

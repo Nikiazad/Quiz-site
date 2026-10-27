@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Quiz, Question, Option
+from .models import Answer, Option, Player, Question, Quiz, Session
 
 
 class OptionInline(admin.TabularInline):
@@ -23,3 +23,17 @@ class QuestionInline(admin.TabularInline):
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
     inlines = [QuestionInline]
+
+
+@admin.register(Session)
+class SessionAdmin(admin.ModelAdmin):
+    list_display = ("quiz", "code", "phase", "created_at")
+    readonly_fields = ("code",)
+
+
+@admin.register(Player)
+class PlayerAdmin(admin.ModelAdmin):
+    list_display = ("name", "session", "score")
+
+
+admin.site.register(Answer)

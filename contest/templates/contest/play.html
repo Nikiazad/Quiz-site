@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>مسابقه</title>
+  <style>
+    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0}
+    .wrap{max-width:560px;margin:0 auto;padding:16px}
+    #top{background:#1b1f3d;border-radius:12px;padding:10px 14px}
+    #view{text-align:center}
+    img,video{max-width:100%;max-height:40vh;border-radius:12px}
+    audio{width:100%}
+    .timer{font-size:2rem;font-weight:bold;margin:8px 0}
+    .opts{display:grid;gap:10px;margin-top:12px}
+    .opt{background:#3b82f6;border-radius:12px;padding:16px;font-size:1.2rem;cursor:pointer}
+    .opt.chosen{outline:4px solid #fff}
+    .opt.correct{background:#22c55e}
+    .opt.wrong{background:#6b7280}
+    .timeup .opt,.locked .opt{pointer-events:none;opacity:.6}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="top"></div>
+  <div id="view"></div>
+</div>
+<script>
+const stateUrl = "{% url 'contest:state' session.code %}";
+const answerUrl = "{% url 'contest:answer' session.code %}";
+const csrf = document.querySelector('meta[name="csrf-token"]').content;
+const view = document.getElementById("view");
+let lastKey = "";
+let sending = false;
+
+function el(tag, text, cls) {
+  const e = document.createElement(tag);
+  if (text) e.textContent = text;
+  if (cls) e.className = cls;
+  return e;
+}
+
+function mediaEl(m) {
+  if (!m) return null;
+  const tag = m.type === "image" ? "img" : m.type === "audio" ? "audio" : "video";
+  const e = document.createElement(tag);
+  e.src = m.url;
+  if (m.type !== "image") e.controls = true;
+  if (m.type === "video") e.playsInline = true;
+  return e;
+}
+
+async function sendAnswer(optionId) {
+  if (sending) return;
+  sending = true;
+  view.classList.add("locked");
+  try {
+    await fetch(answerUrl, {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+      body: JSON.stringify({option_id: optionId}),
+    });
+  } catch (e) {}
+  sending = false;
+  view.classList.remove("locked");
+  tick();
+}
+
+function render(s) {
+  document.getElementById("top").textContent = s.player.name + " · " + s.player.score + " امتیاز";
+  const q = s.question;
+  const key = s.phase + "|" + (q ? q.id : "") + "|" + (q ? q.my_option : "");
+
+  if (key !== lastKey) {
+    lastKey = key;
+    view.replaceChildren();
+    if (s.phase === "lobby") {
+      view.append(el("h2", "منتظر شروع مسابقه باش 🎬"));
+    } else if (q) {
+      view.append(el("h2", q.text));
+      const m = mediaEl(q.media);
+      if (m) view.append(m);
+      if (s.phase === "question") {
+        const t = el("div", "", "timer");
+        t.id = "t";
+        view.append(t);
+      }
+      const box = el("div", "", "opts");
+      q.options.forEach(o => {
+        const b = el("div", o.text, "opt");
+        const om = mediaEl(o.media);
+        if (om) {
+          om.onclick = ev => ev.stopPropagation();
+          b.append(om);
+        }
+        if (o.id === q.my_option) b.classList.add("chosen");
+        if (s.phase === "reveal") {
+          b.classList.add(o.is_correct ? "correct" : "wrong");
+        } else if (q.my_option === null) {
+          b.onclick = () => sendAnswer(o.id);
+        }
+        box.append(b);
+      });
+      view.append(box);
+      if (s.phase === "question" && q.my_option !== null) {
+        view.append(el("p", "✅ جوابت ثبت شد، منتظر بقیه باش"));
+      }
+      if (s.phase === "reveal") {
+        let msg = "⏱ جواب ندادی";
+        if (q.my_option !== null) {
+          msg = q.my_points > 0 ? "🎉 درست گفتی! +" + q.my_points + " امتیاز" : "❌ این بار نشد";
+        }
+        view.append(el("h3", msg));
+        if (q.explanation) view.append(el("p", q.explanation));
+      }
+    } else {
+      view.append(el("h2", s.phase === "finished" ? "🏁 مسابقه تموم شد" : "📊 لیدربورد (به‌زودی)"));
+    }
+  }
+
+  const t = document.getElementById("t");
+  if (t && q) t.textContent = Math.ceil(q.seconds_left);
+  view.classList.toggle("timeup", !!(q && s.phase === "question" && q.seconds_left <= 0));
+}
+
+async function tick() {
+  try {
+    const r = await fetch(stateUrl);
+    if (r.status === 403) { location.href = "{% url 'contest:join' %}"; return; }
+    render(await r.json());
+  } catch (e) {}
+}
+tick();
+setInterval(tick, 1500);
+</script>
+</body>
+</html>
