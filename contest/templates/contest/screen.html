@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ session.quiz.title }}</title>
+  <style>
+    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0}
+    .big{max-width:1100px;margin:0 auto;padding:24px;text-align:center}
+    h1{font-size:2.6rem} h2{font-size:2.2rem}
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+    .qr img{width:100%;max-width:340px;background:#fff;border-radius:16px;padding:8px}
+    .code{font-size:3rem;font-weight:bold;letter-spacing:8px}
+    .mut{color:#9aa0cf}
+    img.m,video.m{max-width:100%;max-height:45vh;border-radius:14px}
+    audio.m{width:80%}
+    .timer{font-size:3rem;font-weight:bold}
+    .bar{height:12px;background:#12163a;border-radius:9px;overflow:hidden;margin:10px 0}
+    .bar>i{display:block;height:100%;background:#2dd4bf;transition:width .4s linear}
+    .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+    .opt{background:#3b82f6;border-radius:14px;padding:18px;font-size:1.6rem}
+    .opt.correct{background:#22c55e}.opt.wrong{background:#4b5563}
+    .opt small{display:block;font-size:1.1rem;margin-top:6px}
+    .lb{width:100%;border-collapse:collapse;font-size:1.8rem}
+    .lb td{padding:12px;border-bottom:1px solid #2a2f63}
+    .lb tr:first-child td{color:#ffd166;font-weight:bold}
+  </style>
+</head>
+<body>
+<div class="big" id="view"></div>
+<script>
+const stateUrl = "{% url 'contest:screen_state' session.code %}";
+const qrUrl = "{% url 'contest:screen_qr' session.code %}";
+const view = document.getElementById("view");
+let lastKey = "";
+
+function el(tag, text, cls) {
+  const e = document.createElement(tag);
+  if (text) e.textContent = text;
+  if (cls) e.className = cls;
+  return e;
+}
+function mediaEl(m) {
+  if (!m) return null;
+  const tag = m.type === "image" ? "img" : m.type === "audio" ? "audio" : "video";
+  const e = document.createElement(tag);
+  e.src = m.url;
+  e.className = "m";
+  if (m.type !== "image") e.controls = true;
+  if (m.type === "video") e.playsInline = true;
+  return e;
+}
+
+function render(s) {
+  const q = s.question;
+  let key = s.phase + "|" + (q ? q.id : "");
+  if (s.phase === "reveal") key += "|" + JSON.stringify(q.options.map(o => o.count));
+  if (s.board) key += "|" + JSON.stringify(s.board);
+
+  if (key !== lastKey) {
+    lastKey = key;
+    view.replaceChildren();
+
+    if (s.phase === "lobby") {
+      const cols = el("div", "", "cols");
+      const left = document.createElement("div");
+      left.append(el("h1", s.title));
+      left.append(el("p", "QR رو اسکن کن یا کد رو وارد کن:", "mut"));
+      left.append(el("div", s.code, "code"));
+      const u = el("p", s.join_url, "mut");
+      u.dir = "ltr";
+      left.append(u);
+      left.append(el("h2", "", ""));
+      left.lastChild.id = "pc";
+      const right = el("div", "", "qr");
+      const img = document.createElement("img");
+      img.src = qrUrl;
+      right.append(img);
+      cols.append(left, right);
+      view.append(cols);
+    } else if (q) {
+      view.append(el("h2", q.text));
+      const m = mediaEl(q.media);
+      if (m) view.append(m);
+      if (s.phase === "question") {
+        const t = el("div", "", "timer"); t.id = "t"; view.append(t);
+        const bar = el("div", "", "bar"); const i = document.createElement("i"); i.id = "b";
+        bar.append(i); view.append(bar);
+        const a = el("p", "", "mut"); a.id = "a"; view.append(a);
+      }
+      const box = el("div", "", "opts");
+      q.options.forEach(o => {
+        const b = el("div", o.text, "opt");
+        const om = mediaEl(o.media);
+        if (om) b.append(om);
+        if (s.phase === "reveal") {
+          b.classList.add(o.is_correct ? "correct" : "wrong");
+          b.append(el("small", o.count + " نفر"));
+        }
+        box.append(b);
+      });
+      view.append(box);
+      if (s.phase === "reveal" && q.explanation) view.append(el("p", q.explanation, "mut"));
+    } else {
+      view.append(el("h1", s.phase === "finished" ? "🏆 نتیجه‌ی نهایی" : "📊 لیدربورد"));
+      const tb = document.createElement("table");
+      tb.className = "lb";
+      (s.board || []).forEach((p, i) => {
+        const tr = document.createElement("tr");
+        [i + 1, p.name, p.score].forEach(v => {
+          const td = document.createElement("td"); td.textContent = v; tr.append(td);
+        });
+        tb.append(tr);
+      });
+      view.append(tb);
+    }
+  }
+
+  // بخش‌هایی که بدون ساخت دوباره‌ی صفحه به‌روز می‌شن
+  const pc = document.getElementById("pc");
+  if (pc) pc.textContent = s.players + " نفر وارد شدن";
+  if (q && s.phase === "question") {
+    document.getElementById("t").textContent = Math.ceil(q.seconds_left);
+    document.getElementById("b").style.width = (100 * q.seconds_left / q.time_limit) + "%";
+    document.getElementById("a").textContent = "جواب داده‌اند: " + q.answered + " از " + s.players;
+  }
+}
+
+async function tick() {
+  try { render(await (await fetch(stateUrl)).json()); } catch (e) {}
+}
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

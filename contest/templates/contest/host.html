@@ -44,7 +44,7 @@
       🏁 پایان مسابقه
     </button>
   </form>
-  <p><a href="{% url 'contest:host_home' %}">بازگشت</a> · <a href="">رفرش اطلاعات</a></p>
+  <p><a href="{% url 'contest:screen' session.code %}" target="_blank">باز کردن صفحه‌ی پروژکتور</a> . <a href="{% url 'contest:host_home' %}">بازگشت</a> · <a href="">رفرش اطلاعات</a></p>
 </div>
 </body>
 </html>

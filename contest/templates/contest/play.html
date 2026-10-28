@@ -19,6 +19,9 @@
     .opt.correct{background:#22c55e}
     .opt.wrong{background:#6b7280}
     .timeup .opt,.locked .opt{pointer-events:none;opacity:.6}
+    .lb{width:100%;border-collapse:collapse;margin-top:8px}
+    .lb td{padding:10px;border-bottom:1px solid #2a2f63}
+    .lb tr:first-child td{color:#ffd166;font-weight:bold}
   </style>
 </head>
 <body>
@@ -115,7 +118,20 @@ function render(s) {
         if (q.explanation) view.append(el("p", q.explanation));
       }
     } else {
-      view.append(el("h2", s.phase === "finished" ? "🏁 مسابقه تموم شد" : "📊 لیدربورد (به‌زودی)"));
+      view.append(el("h2", s.phase === "finished" ? "🏁 نتیجه‌ی نهایی" : "📊 لیدربورد"));
+      const tb = document.createElement("table");
+      tb.className = "lb";
+      (s.board || []).forEach((p, i) => {
+        const tr = document.createElement("tr");
+        [i + 1, p.name, p.score].forEach(v => {
+          const td = document.createElement("td");
+          td.textContent = v;
+          tr.append(td);
+        });
+        tb.append(tr);
+      });
+      view.append(tb);
+      view.append(el("p", "رتبه‌ی تو: " + s.my_rank));
     }
   }
 

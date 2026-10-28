@@ -1,4 +1,8 @@
 import json
+import io
+import socket
+
+import segno
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError, transaction
@@ -8,6 +12,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.conf import settings
+from django.db.models import Count
+from django.http import HttpResponse
 
 from .models import Answer, Player, Quiz, Session
 
@@ -30,6 +37,9 @@ def state(request, code):
         "phase": session.phase,
         "player": {"name": player.name, "score": player.score},
     }
+    if session.phase in (Session.BOARD, Session.FINISHED):
+        data["board"] = leaderboard(session)
+        data["my_rank"] = session.players.filter(score__gt=player.score).count() + 1
     q = session.current_question
     if q and session.phase in (Session.QUESTION, Session.REVEAL):
         revealing = session.phase == Session.REVEAL
@@ -151,7 +161,7 @@ def host(request, code):
         "current_no": current_no,
         "players": session.players.count(),
         "answered": answered,
-        "join_url": request.build_absolute_uri(reverse("contest:join")) + "?code=" + session.code,
+        "join_url": player_url(request, session),
     })
 
 
@@ -179,3 +189,82 @@ def host_action(request, code):
         session.phase = Session.FINISHED
     session.save()
     return redirect("contest:host", code=session.code)
+
+
+def lan_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))
+        return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
+
+def player_url(request, session):
+    # گوشی‌ها باید آدرس شبکه‌ی محلی رو ببینن، نه 127.0.0.1
+    base = getattr(settings, "PUBLIC_BASE_URL", "") or f"http://{lan_ip()}:{request.get_port()}"
+    return f"{base}{reverse('contest:join')}?code={session.code}"
+
+
+def leaderboard(session, limit=10):
+    players = session.players.order_by("-score", "joined_at")[:limit]
+    return [{"name": p.name, "score": p.score} for p in players]
+
+
+@staff_member_required
+def screen(request, code):
+    session = get_object_or_404(Session, code=code)
+    return render(request, "contest/screen.html", {"session": session})
+
+
+@staff_member_required
+def screen_qr(request, code):
+    session = get_object_or_404(Session, code=code)
+    buf = io.BytesIO()
+    segno.make(player_url(request, session), error="m").save(
+        buf, kind="svg", scale=8, border=2, dark="#111", light="#fff"
+    )
+    return HttpResponse(buf.getvalue(), content_type="image/svg+xml")
+
+
+@staff_member_required
+def screen_state(request, code):
+    session = get_object_or_404(Session, code=code)
+    data = {
+        "phase": session.phase,
+        "title": session.quiz.title,
+        "code": session.code,
+        "players": session.players.count(),
+        "join_url": player_url(request, session),
+    }
+    q = session.current_question
+    if q and session.phase in (Session.QUESTION, Session.REVEAL):
+        revealing = session.phase == Session.REVEAL
+        counts = {}
+        if revealing:
+            rows = (Answer.objects.filter(question=q, player__session=session)
+                    .values("option_id").annotate(n=Count("id")))
+            counts = {r["option_id"]: r["n"] for r in rows}
+        options = []
+        for o in q.options.order_by("id"):
+            item = {"id": o.id, "text": o.text, "media": media_dict(o.media_file, o.media_type)}
+            if revealing:
+                item["is_correct"] = o.is_correct
+                item["count"] = counts.get(o.id, 0)
+            options.append(item)
+        data["question"] = {
+            "id": q.id,
+            "text": q.text,
+            "media": media_dict(q.media_file, q.media_type),
+            "time_limit": q.time_limit,
+            "seconds_left": round(session.seconds_left(), 1),
+            "answered": Answer.objects.filter(question=q, player__session=session).count(),
+            "options": options,
+        }
+        if revealing:
+            data["question"]["explanation"] = q.explanation
+    if session.phase in (Session.BOARD, Session.FINISHED):
+        data["board"] = leaderboard(session)
+    return JsonResponse(data)

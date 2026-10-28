@@ -11,4 +11,7 @@ urlpatterns = [
     path("host/", views.host_home, name="host_home"),
     path("host/<str:code>/", views.host, name="host"),
     path("host/<str:code>/action/", views.host_action, name="host_action"),
+    path("screen/<str:code>/", views.screen, name="screen"),
+    path("screen/<str:code>/state/", views.screen_state, name="screen_state"),
+    path("screen/<str:code>/qr.svg", views.screen_qr, name="screen_qr"),
 ]
