@@ -67,29 +67,47 @@ def state(request, code):
             data["question"]["explanation"] = q.explanation
     return JsonResponse(data)
 
+def current_player(request):
+    token = request.session.get("player_token")
+    if not token:
+        return None
+    return Player.objects.select_related("session").filter(token=token).first()
 
 def join(request):
+    me = current_player(request)
+    resumable = me is not None and me.session.phase != Session.FINISHED
+
+    if request.method == "GET":
+        wanted = request.GET.get("code", "").strip()
+        if resumable and wanted in ("", me.session.code):
+            return redirect("contest:play", code=me.session.code)
+        return render(request, "contest/join.html", {"error": ""})
+
     error = ""
-    if request.method == "POST":
-        code = request.POST.get("code", "").strip()
-        name = " ".join(request.POST.get("name", "").split())[:40]
-        session = Session.objects.exclude(phase=Session.FINISHED).filter(code=code).first()
-        taken = "این اسم توی این مسابقه استفاده شده، یه اسم دیگه انتخاب کن."
-        if not session:
-            error = "کد اشتباهه یا این مسابقه تموم شده."
-        elif not name:
-            error = "اسمت رو بنویس."
-        elif Player.objects.filter(session=session, name__iexact=name).exists():
+    code = request.POST.get("code", "").strip()
+    name = " ".join(request.POST.get("name", "").split())[:40]
+    session = Session.objects.exclude(phase=Session.FINISHED).filter(code=code).first()
+    taken = (
+        "این اسم توی این مسابقه استفاده شده. اگه خودت قبلاً وارد شده بودی، "
+        "از همون مرورگر برگرد. وگرنه یه اسم دیگه انتخاب کن."
+    )
+    if not session:
+        error = "کد اشتباهه یا این مسابقه تموم شده."
+    elif resumable and me.session_id == session.id:
+        return redirect("contest:play", code=session.code)
+    elif not name:
+        error = "اسمت رو بنویس."
+    elif Player.objects.filter(session=session, name__iexact=name).exists():
+        error = taken
+    else:
+        try:
+            with transaction.atomic():
+                player = Player.objects.create(session=session, name=name)
+        except IntegrityError:
             error = taken
         else:
-            try:
-                with transaction.atomic():
-                    player = Player.objects.create(session=session, name=name)
-            except IntegrityError:
-                error = taken
-            else:
-                request.session["player_token"] = player.token
-                return redirect("contest:play", code=session.code)
+            request.session["player_token"] = player.token
+            return redirect("contest:play", code=session.code)
     return render(request, "contest/join.html", {"error": error})
 
 

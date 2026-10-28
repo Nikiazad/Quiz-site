@@ -237,3 +237,30 @@ class JoinTests(GameTestBase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Player.objects.create(session=self.session, name="NIKI")
+
+    def test_returning_player_is_redirected_from_join_page(self):
+        player, client = self.make_player("Ali")
+        resp = client.get(reverse("contest:join"))
+        self.assertRedirects(
+            resp, reverse("contest:play", args=[self.session.code]), fetch_redirect_response=False
+        )
+
+    def test_returning_player_does_not_create_a_second_player(self):
+        player, client = self.make_player("Ali")
+        resp = client.post(reverse("contest:join"), {"code": self.session.code, "name": "Ali 2"})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(Player.objects.filter(session=self.session).count(), 1)
+
+    def test_cookie_of_finished_session_shows_the_form(self):
+        player, client = self.make_player("Ali")
+        self.session.phase = Session.FINISHED
+        self.session.save()
+        self.assertEqual(client.get(reverse("contest:join")).status_code, 200)
+
+    def test_player_can_join_a_different_session(self):
+        player, client = self.make_player("Ali")
+        other = Session.objects.create(quiz=self.quiz)
+        self.assertEqual(client.get(reverse("contest:join") + "?code=" + other.code).status_code, 200)
+        resp = client.post(reverse("contest:join"), {"code": other.code, "name": "Ali"})
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(Player.objects.filter(session=other, name="Ali").exists())
