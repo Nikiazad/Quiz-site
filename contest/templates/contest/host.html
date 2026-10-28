@@ -1,28 +1,19 @@
+{% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>پنل مجری - {{ session.code }}</title>
-  <style>
-    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0}
-    .wrap{max-width:560px;margin:0 auto;padding:16px}
-    .card{background:#1b1f3d;border-radius:14px;padding:16px;margin:12px 0}
-    .code{font-size:2.4rem;font-weight:bold;letter-spacing:6px;text-align:center}
-    button{width:100%;padding:16px;border-radius:12px;border:0;font-size:1.1rem;color:#fff;cursor:pointer;margin:6px 0}
-    button:disabled{opacity:.35;cursor:not-allowed}
-    .go{background:#ff4f8b}.rev{background:#8b5cf6}.brd{background:#0ea5e9}.fin{background:#16a34a}
-    a{color:#7dd3fc}
-  </style>
+  <link rel="stylesheet" href="{% static 'contest/style.css' %}">
 </head>
-<body>
+<body class="page-host">
 <div class="wrap">
   <h2>{{ session.quiz.title }}</h2>
   <div class="card">
     <div>کد ورود:</div>
     <div class="code">{{ session.code }}</div>
-    <div style="direction:ltr;text-align:center;word-break:break-all"><a href="{{ join_url }}">{{ join_url }}</a></div>
-  </div>
+    <div class="join-link"><a href="{{ join_url }}">{{ join_url }}</a></div>
   <div class="card">
     <div>مرحله: <b>{{ session.get_phase_display }}</b></div>
     <div>سؤال: <b>{{ current_no }}</b> از {{ total }}</div>

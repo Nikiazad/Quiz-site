@@ -1,32 +1,13 @@
+{% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ session.quiz.title }}</title>
-  <style>
-    body{font-family:Tahoma,sans-serif;background:#0f1226;color:#fff;margin:0}
-    .big{max-width:1100px;margin:0 auto;padding:24px;text-align:center}
-    h1{font-size:2.6rem} h2{font-size:2.2rem}
-    .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
-    .qr img{width:100%;max-width:340px;background:#fff;border-radius:16px;padding:8px}
-    .code{font-size:3rem;font-weight:bold;letter-spacing:8px}
-    .mut{color:#9aa0cf}
-    img.m,video.m{max-width:100%;max-height:45vh;border-radius:14px}
-    audio.m{width:80%}
-    .timer{font-size:3rem;font-weight:bold}
-    .bar{height:12px;background:#12163a;border-radius:9px;overflow:hidden;margin:10px 0}
-    .bar>i{display:block;height:100%;background:#2dd4bf;transition:width .4s linear}
-    .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
-    .opt{background:#3b82f6;border-radius:14px;padding:18px;font-size:1.6rem}
-    .opt.correct{background:#22c55e}.opt.wrong{background:#4b5563}
-    .opt small{display:block;font-size:1.1rem;margin-top:6px}
-    .lb{width:100%;border-collapse:collapse;font-size:1.8rem}
-    .lb td{padding:12px;border-bottom:1px solid #2a2f63}
-    .lb tr:first-child td{color:#ffd166;font-weight:bold}
-  </style>
+  <link rel="stylesheet" href="{% static 'contest/style.css' %}">
 </head>
-<body>
+<body class="page-screen">
 <div class="big" id="view"></div>
 <script>
 const stateUrl = "{% url 'contest:screen_state' session.code %}";
