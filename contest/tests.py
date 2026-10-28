@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.db import IntegrityError, transaction
 
 from .models import Answer, Option, Player, Question, Quiz, Session
 
@@ -213,3 +214,26 @@ class JoinTests(GameTestBase):
         self.session.save()
         self.client.post(reverse("contest:join"), {"code": self.session.code, "name": "Niki"})
         self.assertEqual(Player.objects.count(), 0)
+
+
+    def test_duplicate_name_is_rejected_ignoring_case_and_spaces(self):
+        Player.objects.create(session=self.session, name="Niki")
+        resp = self.client.post(
+            reverse("contest:join"), {"code": self.session.code, "name": "  niki "}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Player.objects.filter(session=self.session).count(), 1)
+
+    def test_same_name_allowed_in_another_session(self):
+        other = Session.objects.create(quiz=self.quiz)
+        Player.objects.create(session=other, name="Niki")
+        resp = self.client.post(
+            reverse("contest:join"), {"code": self.session.code, "name": "Niki"}
+        )
+        self.assertEqual(resp.status_code, 302)
+
+    def test_database_blocks_duplicate_names(self):
+        Player.objects.create(session=self.session, name="Niki")
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Player.objects.create(session=self.session, name="NIKI")

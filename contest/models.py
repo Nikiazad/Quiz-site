@@ -4,6 +4,7 @@ import secrets
 from django.db import models
 from django.utils import timezone
 from django.db import models
+from django.db.models.functions import Lower
 
 
 class Quiz(models.Model):
@@ -91,6 +92,13 @@ class Player(models.Model):
     score = models.PositiveIntegerField(default=0)
     joined_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"), "session", name="unique_player_name_per_session"
+            )
+        ]
+    
     def __str__(self):
         return self.name
 

@@ -72,16 +72,24 @@ def join(request):
     error = ""
     if request.method == "POST":
         code = request.POST.get("code", "").strip()
-        name = request.POST.get("name", "").strip()[:40]
+        name = " ".join(request.POST.get("name", "").split())[:40]
         session = Session.objects.exclude(phase=Session.FINISHED).filter(code=code).first()
+        taken = "این اسم توی این مسابقه استفاده شده، یه اسم دیگه انتخاب کن."
         if not session:
             error = "کد اشتباهه یا این مسابقه تموم شده."
         elif not name:
             error = "اسمت رو بنویس."
+        elif Player.objects.filter(session=session, name__iexact=name).exists():
+            error = taken
         else:
-            player = Player.objects.create(session=session, name=name)
-            request.session["player_token"] = player.token
-            return redirect("contest:play", code=session.code)
+            try:
+                with transaction.atomic():
+                    player = Player.objects.create(session=session, name=name)
+            except IntegrityError:
+                error = taken
+            else:
+                request.session["player_token"] = player.token
+                return redirect("contest:play", code=session.code)
     return render(request, "contest/join.html", {"error": error})
 
 
