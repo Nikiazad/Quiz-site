@@ -22,6 +22,11 @@
 
   <section class="card">
     <h3>وضعیت مسابقه</h3>
+    {% if session.phase == 'question' %}
+    <div class="timer-row">
+      <div class="timer" id="host-timer">{{ session.seconds_left|floatformat:0 }}</div>
+    </div>
+    {% endif %}
     <div class="status">
       <div class="stat">
         <small>مرحله</small>
@@ -56,9 +61,9 @@
         <button class="rev" name="action" value="reveal" {% if session.phase != 'question' %}disabled{% endif %}>
           نمایش جواب درست
         </button>
-        <button class="brd" name="action" value="board" {% if session.phase != 'reveal' %}disabled{% endif %}>
-          نمایش لیدربورد
-        </button>
+        <a class="brd" href="{% url 'contest:leaderboard' session.code %}" target="_blank" rel="noopener">
+          باز کردن لیدربورد (پروژکتور)
+        </a>
       </div>
       <div class="end">
         <button class="fin" name="action" value="finish" {% if session.phase == 'finished' %}disabled{% endif %}>
@@ -85,6 +90,31 @@
       setTimeout(function () { btn.textContent = 'کپی کد'; }, 1500);
     });
   });
+  /* به‌روزرسانی زنده: تایمر، تعداد بازیکن‌ها و تعداد جواب‌ها */
+  (function () {
+    var phase = "{{ session.phase }}";
+    if (phase === "finished") return;
+    var url = "{% url 'contest:screen_state' session.code %}";
+    var timer = document.getElementById("host-timer");
+    var answered = document.getElementById("stat-answered");
+    var players = document.getElementById("stat-players");
+
+    function tick() {
+      fetch(url).then(function (r) { return r.json(); }).then(function (s) {
+        if (s.phase !== phase) { location.reload(); return; }
+        if (players) players.textContent = s.players;
+        if (s.question) {
+          if (timer) {
+            timer.textContent = Math.ceil(s.question.seconds_left);
+            timer.classList.toggle("low", s.question.seconds_left <= 5);
+          }
+          if (answered) answered.textContent = s.question.answered;
+        }
+      }).catch(function () {});
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
 </script>
 </body>
 </html>

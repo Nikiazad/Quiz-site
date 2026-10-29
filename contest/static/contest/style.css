@@ -392,3 +392,60 @@ background:
 .page-screen .opt small{display:block;font-size:1.1rem;margin-top:6px}
 .page-screen .lb{font-size:1.8rem}
 .page-screen .lb td{padding:12px}
+
+/* ===== به style.css اضافه کن: ۱) تایمر و لینک لیدربورد در پنل مجری ===== */
+.page-host .timer-row{display:flex;justify-content:center;margin:0 0 16px}
+.page-host .timer{
+  display:flex;align-items:center;justify-content:center;
+  width:72px;height:72px;border-radius:50%;
+  font-family:Consolas,"Courier New",monospace;font-size:1.8rem;font-weight:700;
+  color:var(--h-mint);background:var(--h-chip);border:1px solid var(--h-chip-line);
+  box-shadow:0 0 18px rgba(52,211,153,.2);
+  transition:color .3s,border-color .3s,box-shadow .3s;
+}
+.page-host .timer.low{
+  color:var(--h-danger);border-color:rgba(248,113,113,.55);
+  box-shadow:0 0 18px rgba(248,113,113,.3);
+}
+
+.page-host .row a{flex:1 1 180px}
+.page-host a.brd{
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;text-decoration:none;
+  padding:12px 24px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.35);background:transparent;
+  transition:background .15s;
+}
+.page-host a.brd:hover{background:rgba(255,255,255,.07)}
+.page-host a.brd:focus-visible{outline:2px solid #8fb4ff;outline-offset:3px}
+
+/* ===== ۲) لیدربورد پروژکتور ===== */
+.page-board{
+  min-height:100vh;
+  background:
+    radial-gradient(520px 320px at 85% 8%,rgba(79,111,232,.30),transparent 70%),
+    radial-gradient(480px 300px at 10% 85%,rgba(79,229,255,.18),transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.page-board .board-wrap{max-width:1100px;margin:0 auto;padding:4vh 4vw}
+.page-board .board-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:3vh}
+.page-board h1{margin:0;font-size:clamp(1.8rem,4.6vh,3.2rem)}
+.page-board .sub{display:flex;align-items:center;gap:14px;color:#9aa3c7;font-size:clamp(1rem,2.6vh,1.6rem)}
+.page-board .count{
+  font-size:.85em;font-weight:700;color:#c9f7d6;
+  background:#0e1433;border:1px solid #2b3a8a;border-radius:999px;padding:2px 14px;
+}
+.page-board .board{list-style:none;margin:0;padding:0;display:grid;gap:1.4vh}
+.page-board .board li{
+  display:grid;grid-template-columns:clamp(56px,8vh,90px) 1fr auto;align-items:center;gap:2vw;
+  padding:1.6vh 2vw;border-radius:16px;font-size:clamp(1.2rem,3.4vh,2.4rem);
+  background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.09);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+.page-board .rank,.page-board .score{font-family:Consolas,"Courier New",monospace;font-weight:700;color:#c9f7d6}
+.page-board .rank{text-align:center}
+.page-board .board li:nth-child(-n+3) .rank{color:#fbbf24}
+.page-board .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page-board .score{direction:ltr}
+.page-board .board li.empty{display:block;text-align:center;color:#9aa3c7;padding:8vh 0;font-weight:400}

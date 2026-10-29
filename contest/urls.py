@@ -16,4 +16,6 @@ urlpatterns = [
     path("screen/<str:code>/qr.svg", views.screen_qr, name="screen_qr"),
     path("host/<str:code>/close/", views.close_session, name="close"),
     path("play/<str:code>/leave/", views.leave, name="leave"),
+    path("screen/<str:code>/board/", views.leaderboard_page, name="leaderboard"),
+    path("screen/<str:code>/board/state/", views.leaderboard_state, name="leaderboard_state"),
 ]

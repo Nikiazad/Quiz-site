@@ -322,3 +322,37 @@ def leave(request, code):
     if token:
         Player.objects.filter(token=token, session=session).update(left=True)
     return redirect("contest:join")
+
+
+def live_board(session, limit=10):
+    # در حین سؤال، امتیاز همان سؤال پنهان می‌ماند تا لیدربورد جواب درست را لو ندهد
+    hidden = {}
+    if session.phase == Session.QUESTION and session.current_question_id:
+        hidden = dict(
+            Answer.objects.filter(
+                question_id=session.current_question_id, player__session=session
+            ).values_list("player_id", "points")
+        )
+    rows = [
+        {"name": p.name, "score": p.score - hidden.get(p.id, 0), "joined": p.joined_at}
+        for p in session.players.all()
+    ]
+    rows.sort(key=lambda r: (-r["score"], r["joined"]))
+    return [{"name": r["name"], "score": r["score"]} for r in rows[:limit]]
+
+
+@staff_member_required
+def leaderboard_page(request, code):
+    session = get_object_or_404(Session, code=code)
+    return render(request, "contest/leaderboard.html", {"session": session})
+
+
+@staff_member_required
+def leaderboard_state(request, code):
+    session = get_object_or_404(Session, code=code)
+    return JsonResponse({
+        "phase": session.phase,
+        "title": session.quiz.title,
+        "players": session.players.count(),
+        "board": live_board(session),
+    })

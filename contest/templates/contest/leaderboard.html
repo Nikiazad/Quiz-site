@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لیدربورد - {{ session.quiz.title }}</title>
+  <link rel="stylesheet" href="{% static 'contest/style.css' %}">
+</head>
+<body class="page-board">
+<div class="board-wrap">
+  <header class="board-head">
+    <h1 id="heading">لیدربورد</h1>
+    <div class="sub"><span id="quiz-title">{{ session.quiz.title }}</span><span class="count" id="count"></span></div>
+  </header>
+  <ol class="board" id="board"></ol>
+</div>
+
+<script>
+const stateUrl = "{% url 'contest:leaderboard_state' session.code %}";
+const heading = document.getElementById("heading");
+const count = document.getElementById("count");
+const list = document.getElementById("board");
+let last = "";
+
+function cell(tag, cls, text) {
+  const e = document.createElement(tag);
+  e.className = cls;
+  e.textContent = text;
+  return e;
+}
+
+function render(s) {
+  const key = JSON.stringify(s);
+  if (key === last) return;
+  last = key;
+
+  heading.textContent = s.phase === "finished" ? "نتیجه‌ی نهایی" : "لیدربورد";
+  count.textContent = s.players + " بازیکن";
+  list.replaceChildren();
+
+  if (!s.board.length) {
+    list.append(cell("li", "empty", "هنوز بازیکنی وارد نشده"));
+    return;
+  }
+  s.board.forEach(function (p, i) {
+    const li = document.createElement("li");
+    li.append(cell("span", "rank", i + 1), cell("span", "name", p.name), cell("span", "score", p.score));
+    list.append(li);
+  });
+}
+
+async function tick() {
+  try { render(await (await fetch(stateUrl)).json()); } catch (e) {}
+}
+tick();
+setInterval(tick, 2000);
+</script>
+</body>
+</html>
