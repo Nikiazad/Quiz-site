@@ -91,14 +91,24 @@ def join(request):
         "این اسم توی این مسابقه استفاده شده. اگه خودت قبلاً وارد شده بودی، "
         "از همون مرورگر برگرد. وگرنه یه اسم دیگه انتخاب کن."
     )
+    existing = (
+        Player.objects.filter(session=session, name__iexact=name).first()
+        if session and name else None
+    )
     if not session:
         error = "کد اشتباهه یا این مسابقه تموم شده."
     elif resumable and me.session_id == session.id:
         return redirect("contest:play", code=session.code)
     elif not name:
         error = "اسمت رو بنویس."
-    elif Player.objects.filter(session=session, name__iexact=name).exists():
+    elif existing and not existing.left:
         error = taken
+    elif existing:
+        # بازیکنی که قبلاً خارج شده؛ با همان اسم برمی‌گردد و امتیازش حفظ است
+        existing.left = False
+        existing.save(update_fields=["left"])
+        request.session["player_token"] = existing.token
+        return redirect("contest:play", code=session.code)
     else:
         try:
             with transaction.atomic():
@@ -217,6 +227,15 @@ def host_action(request, code):
     return redirect("contest:host", code=session.code)
 
 
+@staff_member_required
+@require_POST
+def close_session(request, code):
+    session = get_object_or_404(Session, code=code)
+    session.phase = Session.FINISHED
+    session.save(update_fields=["phase"])
+    return redirect("contest:host_home")
+
+
 def lan_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -294,3 +313,12 @@ def screen_state(request, code):
     if session.phase in (Session.BOARD, Session.FINISHED):
         data["board"] = leaderboard(session)
     return JsonResponse(data)
+
+
+@require_POST
+def leave(request, code):
+    session = get_object_or_404(Session, code=code)
+    token = request.session.pop("player_token", None)
+    if token:
+        Player.objects.filter(token=token, session=session).update(left=True)
+    return redirect("contest:join")

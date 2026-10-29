@@ -12,8 +12,23 @@
     {% csrf_token %}
     <h2>ورود به مسابقه</h2>
     {% if error %}<p class="err">{{ error }}</p>{% endif %}
-    <input name="code" placeholder="کد ۶ رقمی" inputmode="numeric" maxlength="6" value="{{ request.GET.code }}" required>
-    <input name="name" placeholder="اسم یا نام مستعار" maxlength="40" required>
+
+    <div class="field">
+      <label for="name">نام</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4 0-8 2-8 5v3h16v-3c0-3-4-5-8-5Zm0 2c2.7 0 5.2 1.1 5.9 2.4V20H6.1v-1.6C6.8 17.100 9.300 16 12 16Zm0-12a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></svg>
+        <input id="name" name="name" placeholder="اسم یا نام مستعار (باید قابل شناسایی با این نام باشید)" maxlength="40" required>
+      </div>
+    </div>
+ 
+    <div class="field">
+      <label for="code">کد مسابقه</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 3 8.800 7H5v2h3.500l-.6 4H4v2h3.600l-.6 4h2l.6-4h4l-.6 4h2l.6-4H19v-2h-3.500l.6-4H20V7h-3.600l.6-4h-2l-.6 4h-4l.6-4h-2Zm.1 6h4l-.6 4h-4l.6-4Z"/></svg>
+        <input id="code" name="code" placeholder="کد ۶ رقمی" inputmode="numeric" maxlength="6" autocomplete="off" value="{{ request.GET.code }}" required>
+      </div>
+    </div>
+ 
     <button type="submit">ورود</button>
   </form>
 </body>

@@ -10,24 +10,61 @@
 <body class="page-host-home">
 <div class="wrap">
   <h2>پنل مجری</h2>
+
   <form method="post" class="card">
     {% csrf_token %}
     <b>ساخت مسابقه‌ی جدید</b>
-    <select name="quiz" required>
-      {% for q in quizzes %}<option value="{{ q.id }}">{{ q.title }}</option>{% endfor %}
-    </select>
-    <button type="submit">ساخت Session و رفتن به پنل</button>
+    <div class="create">
+      <div class="field">
+        <label for="quiz">انتخاب مسابقه</label>
+        <div class="sel-wrap">
+          <select id="quiz" name="quiz" required>
+            {% for q in quizzes %}<option value="{{ q.id }}">{{ q.title }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <button type="submit">ساخت Session و رفتن به پنل</button>
+    </div>
   </form>
+
   <div class="card">
     <b>Sessionهای باز</b>
-    <ul>
+    <ul class="sessions">
       {% for s in sessions %}
-        <li><a href="{% url 'contest:host' s.code %}">{{ s.quiz.title }} - {{ s.code }}</a></li>
+        <li class="row">
+          <span class="dot" title="باز"></span>
+          <span class="code">{{ s.code }}</span>
+          <span class="title">{{ s.quiz.title }}</span>
+          <button type="button" class="btn-copy" data-copy="{{ s.code }}">کپی کد</button>
+          <a class="enter" href="{% url 'contest:host' s.code %}">ورود به پنل</a>
+          <form method="post" action="{% url 'contest:close' s.code %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-close" onclick="return confirm('این Session بسته بشه؟')">بستن</button>
+          </form>
+        </li>
       {% empty %}
-        <li>هیچی نیست.</li>
+        <li class="empty">هیچی نیست.</li>
       {% endfor %}
     </ul>
   </div>
 </div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.dataset.copy, old=b.textContent;
+    function done(){ b.textContent='کپی شد ✓'; setTimeout(function(){ b.textContent=old; },1200); }
+    function fallback(){
+      var a=document.createElement('textarea');
+      a.value=t; a.style.position='fixed'; a.style.opacity='0';
+      document.body.appendChild(a); a.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      a.remove(); done();
+    }
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(t).then(done,fallback);
+    } else { fallback(); }
+  });
+});
+</script>
 </body>
 </html>

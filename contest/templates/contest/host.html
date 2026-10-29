@@ -9,33 +9,82 @@
 </head>
 <body class="page-host">
 <div class="wrap">
-  <h2>{{ session.quiz.title }}</h2>
-  <div class="card">
-    <div>کد ورود:</div>
-    <div class="code">{{ session.code }}</div>
+  <h2 class="host-title">{{ session.quiz.title }}</h2>
+
+  <section class="card">
+    <h3>کد ورود</h3>
+    <div class="code-row">
+      <div class="code" id="join-code">{{ session.code }}</div>
+      <button type="button" class="copy" id="copy-code">کپی کد</button>
+    </div>
     <div class="join-link"><a href="{{ join_url }}">{{ join_url }}</a></div>
-  <div class="card">
-    <div>مرحله: <b>{{ session.get_phase_display }}</b></div>
-    <div>سؤال: <b>{{ current_no }}</b> از {{ total }}</div>
-    <div>بازیکن‌ها: <b>{{ players }}</b>{% if session.phase == 'question' %} · جواب داده: <b>{{ answered }}</b>{% endif %}</div>
-  </div>
+  </section>
+
+  <section class="card">
+    <h3>وضعیت مسابقه</h3>
+    <div class="status">
+      <div class="stat">
+        <small>مرحله</small>
+        <b><span class="dot"></span>{{ session.get_phase_display }}</b>
+      </div>
+      <div class="stat">
+        <small>سؤال</small>
+        <b>{{ current_no }} از {{ total }}</b>
+      </div>
+      <div class="stat">
+        <small>بازیکن‌ها</small>
+        <b>{{ players }}</b>
+      </div>
+      {% if session.phase == 'question' %}
+      <div class="stat">
+        <small>جواب داده</small>
+        <b>{{ answered }}</b>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
   <form method="post" action="{% url 'contest:host_action' session.code %}" class="card">
     {% csrf_token %}
-    <button class="go" name="action" value="start"
-      {% if session.phase != 'lobby' and session.phase != 'reveal' and session.phase != 'board' %}disabled{% endif %}>
-      ▶️ شروع سؤال بعدی
-    </button>
-    <button class="rev" name="action" value="reveal" {% if session.phase != 'question' %}disabled{% endif %}>
-      ✅ نمایش جواب درست
-    </button>
-    <button class="brd" name="action" value="board" {% if session.phase != 'reveal' %}disabled{% endif %}>
-      📊 نمایش لیدربورد
-    </button>
-    <button class="fin" name="action" value="finish" {% if session.phase == 'finished' %}disabled{% endif %}>
-      🏁 پایان مسابقه
-    </button>
+    <h3>کنترل مسابقه</h3>
+    <div class="actions">
+      <button class="go" name="action" value="start"
+        {% if session.phase != 'lobby' and session.phase != 'reveal' and session.phase != 'board' %}disabled{% endif %}>
+        شروع سؤال بعدی
+      </button>
+      <div class="row">
+        <button class="rev" name="action" value="reveal" {% if session.phase != 'question' %}disabled{% endif %}>
+          نمایش جواب درست
+        </button>
+        <button class="brd" name="action" value="board" {% if session.phase != 'reveal' %}disabled{% endif %}>
+          نمایش لیدربورد
+        </button>
+      </div>
+      <div class="end">
+        <button class="fin" name="action" value="finish" {% if session.phase == 'finished' %}disabled{% endif %}>
+          پایان مسابقه
+        </button>
+      </div>
+    </div>
   </form>
-  <p><a href="{% url 'contest:screen' session.code %}" target="_blank">باز کردن صفحه‌ی پروژکتور</a> . <a href="{% url 'contest:host_home' %}">بازگشت</a> · <a href="">رفرش اطلاعات</a></p>
+
+  <p class="host-links">
+    <a href="{% url 'contest:screen' session.code %}" target="_blank">باز کردن صفحه‌ی پروژکتور</a>
+    <a href="{% url 'contest:host_home' %}">بازگشت</a>
+    <a href="">رفرش اطلاعات</a>
+  </p>
 </div>
+
+<script>
+  document.getElementById('copy-code').addEventListener('click', function () {
+    var btn = this;
+    var code = document.getElementById('join-code').textContent.trim();
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(code).then(function () {
+      btn.textContent = 'کپی شد';
+      setTimeout(function () { btn.textContent = 'کپی کد'; }, 1500);
+    });
+  });
+</script>
 </body>
 </html>

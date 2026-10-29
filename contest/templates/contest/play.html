@@ -10,7 +10,20 @@
 </head>
 <body class="page-play">
 <div class="wrap">
-  <div id="top"></div>
+    <div id="top">
+    <div class="top-side">
+      <form method="post" action="{% url 'contest:leave' session.code %}" class="logout">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn"
+          onclick="return confirm('از مسابقه خارج می‌شی؟ با همون اسم می‌تونی برگردی و امتیازت می‌مونه.')">خروج</button>
+      </form>
+      <span class="p-name" id="p-name">{{ player.name }}</span>
+    </div>
+    <span class="p-rank" id="p-rank"></span>
+    <div class="top-side end">
+      <span class="p-score" id="p-score">{{ player.score }} امتیاز</span>
+    </div>
+  </div>
   <div id="view"></div>
 </div>
 <script>
@@ -55,15 +68,18 @@ async function sendAnswer(optionId) {
 }
 
 function render(s) {
-  document.getElementById("top").textContent = s.player.name + " · " + s.player.score + " امتیاز";
+  /* تغییر ۱: نوار بالا حالا دو بخش جدا دارد (نام و امتیاز) */
+  document.getElementById("p-name").textContent = s.player.name;
+  document.getElementById("p-score").textContent = s.player.score + " امتیاز";
+  document.getElementById("p-rank").textContent = s.my_rank ? "رتبه " + s.my_rank : "";
   const q = s.question;
   const key = s.phase + "|" + (q ? q.id : "") + "|" + (q ? q.my_option : "");
 
   if (key !== lastKey) {
     lastKey = key;
-    view.replaceChildren();
+    view.classList.remove("wide");
     if (s.phase === "lobby") {
-      view.append(el("h2", "منتظر شروع مسابقه باش 🎬"));
+      view.append(el("h2", "منتظر شروع مسابقه باش", "wait"));
     } else if (q) {
       view.append(el("h2", q.text));
       const m = mediaEl(q.media);
@@ -91,18 +107,22 @@ function render(s) {
       });
       view.append(box);
       if (s.phase === "question" && q.my_option !== null) {
-        view.append(el("p", "✅ جوابت ثبت شد، منتظر بقیه باش"));
+        view.append(el("p", "جوابت ثبت شد، منتظر بقیه باش", "note"));
       }
       if (s.phase === "reveal") {
-        let msg = "⏱ جواب ندادی";
+        let msg = "جواب ندادی";
+        let kind = "none";
         if (q.my_option !== null) {
-          msg = q.my_points > 0 ? "🎉 درست گفتی! +" + q.my_points + " امتیاز" : "❌ این بار نشد";
+          if (q.my_points > 0) { msg = "درست گفتی! +" + q.my_points + " امتیاز"; kind = "good"; }
+          else { msg = "این بار نشد"; kind = "bad"; }
         }
-        view.append(el("h3", msg));
-        if (q.explanation) view.append(el("p", q.explanation));
+        /* تغییر ۲: کلاس نتیجه برای رنگ‌دادن به پیام */
+        view.append(el("h3", msg, "result " + kind));
+        if (q.explanation) view.append(el("p", q.explanation, "note"));
       }
-    } else {
-      view.append(el("h2", s.phase === "finished" ? "🏁 نتیجه‌ی نهایی" : "📊 لیدربورد"));
+        } else {
+      view.classList.add("wide");
+      view.append(el("h2", s.phase === "finished" ? "نتیجه‌ی نهایی" : "لیدربورد"));
       const tb = document.createElement("table");
       tb.className = "lb";
       (s.board || []).forEach((p, i) => {
@@ -115,12 +135,15 @@ function render(s) {
         tb.append(tr);
       });
       view.append(tb);
-      view.append(el("p", "رتبه‌ی تو: " + s.my_rank));
     }
   }
 
   const t = document.getElementById("t");
-  if (t && q) t.textContent = Math.ceil(q.seconds_left);
+  if (t && q) {
+    t.textContent = Math.ceil(q.seconds_left);
+    /* تغییر ۳: ۵ ثانیه آخر تایمر قرمز می‌شود */
+    t.classList.toggle("low", q.seconds_left <= 5);
+  }
   view.classList.toggle("timeup", !!(q && s.phase === "question" && q.seconds_left <= 0));
 }
 
