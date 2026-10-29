@@ -46,7 +46,7 @@ function render(s) {
       const cols = el("div", "", "cols");
       const left = document.createElement("div");
       left.append(el("h1", s.title));
-      left.append(el("p", "QR رو اسکن کن یا کد رو وارد کن:", "mut"));
+      left.append(el("p", "QR رو اسکن کنید یا کد رو وارد کنید:", "mut"));
       left.append(el("div", s.code, "code"));
       const u = el("p", s.join_url, "mut");
       u.dir = "ltr";
@@ -83,7 +83,7 @@ function render(s) {
       view.append(box);
       if (s.phase === "reveal" && q.explanation) view.append(el("p", q.explanation, "mut"));
     } else {
-      view.append(el("h1", s.phase === "finished" ? "🏆 نتیجه‌ی نهایی" : "📊 لیدربورد"));
+      view.append(el("h1", s.phase === "finished" ? "نتیجه‌ی نهایی" : "لیدربورد"));
       const tb = document.createElement("table");
       tb.className = "lb";
       (s.board || []).forEach((p, i) => {

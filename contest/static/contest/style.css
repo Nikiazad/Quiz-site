@@ -158,7 +158,7 @@ background:
 .page-host .brd:hover:not(:disabled){background:rgba(255,255,255,.07)}
 
 .page-host .actions{display:flex;flex-direction:column;gap:12px}
-.page-host .go{width:100%;padding:16px;font-size:1.05rem;background:var(--h-navy);border-color:var(--h-chip-line)}
+.page-host .go{width:100%;padding:16px;font-size:1.05rem;background:var(--h-navy);border-color:var(--h-chip-line);text-align: center;}
 .page-host .row{display:flex;gap:12px;flex-wrap:wrap}
 .page-host .row button{flex:1 1 180px}
 .page-host .end{margin-top:8px;padding-top:20px;border-top:1px solid var(--h-line)}

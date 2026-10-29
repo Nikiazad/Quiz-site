@@ -15,7 +15,7 @@
       <form method="post" action="{% url 'contest:leave' session.code %}" class="logout">
         {% csrf_token %}
         <button type="submit" class="logout-btn"
-          onclick="return confirm('از مسابقه خارج می‌شی؟ با همون اسم می‌تونی برگردی و امتیازت می‌مونه.')">خروج</button>
+          onclick="return confirm('از مسابقه خارج می‌شی؟')">خروج</button>
       </form>
       <span class="p-name" id="p-name">{{ player.name }}</span>
     </div>
@@ -77,6 +77,7 @@ function render(s) {
 
   if (key !== lastKey) {
     lastKey = key;
+    view.replaceChildren();
     view.classList.remove("wide");
     if (s.phase === "lobby") {
       view.append(el("h2", "منتظر شروع مسابقه باش", "wait"));
@@ -113,8 +114,8 @@ function render(s) {
         let msg = "جواب ندادی";
         let kind = "none";
         if (q.my_option !== null) {
-          if (q.my_points > 0) { msg = "درست گفتی! +" + q.my_points + " امتیاز"; kind = "good"; }
-          else { msg = "این بار نشد"; kind = "bad"; }
+          if (q.my_points > 0) { msg = "جوابت درست بود! +" + q.my_points + " امتیاز"; kind = "good"; }
+          else { msg = "جوابت اشتباه بود."; kind = "bad"; }
         }
         /* تغییر ۲: کلاس نتیجه برای رنگ‌دادن به پیام */
         view.append(el("h3", msg, "result " + kind));

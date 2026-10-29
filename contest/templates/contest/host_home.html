@@ -23,12 +23,12 @@
           </select>
         </div>
       </div>
-      <button type="submit">ساخت Session و رفتن به پنل</button>
+      <button type="submit">ساخت مسابقه و رفتن به پنل</button>
     </div>
   </form>
 
   <div class="card">
-    <b>Sessionهای باز</b>
+    <b>مسابقه های باز</b>
     <ul class="sessions">
       {% for s in sessions %}
         <li class="row">
@@ -39,11 +39,11 @@
           <a class="enter" href="{% url 'contest:host' s.code %}">ورود به پنل</a>
           <form method="post" action="{% url 'contest:close' s.code %}">
             {% csrf_token %}
-            <button type="submit" class="btn-close" onclick="return confirm('این Session بسته بشه؟')">بستن</button>
+            <button type="submit" class="btn-close" onclick="return confirm('این مسابقه بسته بشه؟')">بستن</button>
           </form>
         </li>
       {% empty %}
-        <li class="empty">هیچی نیست.</li>
+        <li class="empty">خالی</li>
       {% endfor %}
     </ul>
   </div>
