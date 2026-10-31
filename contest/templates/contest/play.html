@@ -95,7 +95,9 @@ function render(s) {
         const b = el("div", o.text, "opt");
         const om = mediaEl(o.media);
         if (om) {
-          om.onclick = ev => ev.stopPropagation();
+          if (o.media.type !== "image") {
+            om.onclick = ev => ev.stopPropagation();
+          }
           b.append(om);
         }
         if (o.id === q.my_option) b.classList.add("chosen");

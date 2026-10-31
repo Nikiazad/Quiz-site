@@ -13,7 +13,7 @@
 const stateUrl = "{% url 'contest:screen_state' session.code %}";
 const qrUrl = "{% url 'contest:screen_qr' session.code %}";
 const view = document.getElementById("view");
-let lastKey = "";
+let built = false;
 
 function el(tag, text, cls) {
   const e = document.createElement(tag);
@@ -21,97 +21,38 @@ function el(tag, text, cls) {
   if (cls) e.className = cls;
   return e;
 }
-function mediaEl(m) {
-  if (!m) return null;
-  const tag = m.type === "image" ? "img" : m.type === "audio" ? "audio" : "video";
-  const e = document.createElement(tag);
-  e.src = m.url;
-  e.className = "m";
-  if (m.type !== "image") e.controls = true;
-  if (m.type === "video") e.playsInline = true;
-  return e;
+
+/* صفحه فقط یک بار ساخته می‌شود و هیچ‌وقت عوض نمی‌شود */
+function build(s) {
+  const cols = el("div", "", "cols");
+  const left = document.createElement("div");
+  left.append(el("h1", s.title));
+  left.append(el("p", "QR رو اسکن کنید یا کد رو وارد کنید:", "mut"));
+  left.append(el("div", s.code, "code"));
+  const u = el("p", s.join_url, "mut");
+  u.dir = "ltr";
+  left.append(u);
+  const pc = el("h2", "");
+  pc.id = "pc";
+  left.append(pc);
+  const right = el("div", "", "qr");
+  const img = document.createElement("img");
+  img.src = qrUrl;
+  right.append(img);
+  cols.append(left, right);
+  view.append(cols);
 }
 
 function render(s) {
-  const q = s.question;
-  let key = s.phase + "|" + (q ? q.id : "");
-  if (s.phase === "reveal") key += "|" + JSON.stringify(q.options.map(o => o.count));
-  if (s.board) key += "|" + JSON.stringify(s.board);
-
-  if (key !== lastKey) {
-    lastKey = key;
-    view.replaceChildren();
-
-    if (s.phase === "lobby") {
-      const cols = el("div", "", "cols");
-      const left = document.createElement("div");
-      left.append(el("h1", s.title));
-      left.append(el("p", "QR رو اسکن کنید یا کد رو وارد کنید:", "mut"));
-      left.append(el("div", s.code, "code"));
-      const u = el("p", s.join_url, "mut");
-      u.dir = "ltr";
-      left.append(u);
-      left.append(el("h2", "", ""));
-      left.lastChild.id = "pc";
-      const right = el("div", "", "qr");
-      const img = document.createElement("img");
-      img.src = qrUrl;
-      right.append(img);
-      cols.append(left, right);
-      view.append(cols);
-    } else if (q) {
-      view.append(el("h2", q.text));
-      const m = mediaEl(q.media);
-      if (m) view.append(m);
-      if (s.phase === "question") {
-        const t = el("div", "", "timer"); t.id = "t"; view.append(t);
-        const bar = el("div", "", "bar"); const i = document.createElement("i"); i.id = "b";
-        bar.append(i); view.append(bar);
-        const a = el("p", "", "mut"); a.id = "a"; view.append(a);
-      }
-      const box = el("div", "", "opts");
-      q.options.forEach(o => {
-        const b = el("div", o.text, "opt");
-        const om = mediaEl(o.media);
-        if (om) b.append(om);
-        if (s.phase === "reveal") {
-          b.classList.add(o.is_correct ? "correct" : "wrong");
-          b.append(el("small", o.count + " نفر"));
-        }
-        box.append(b);
-      });
-      view.append(box);
-      if (s.phase === "reveal" && q.explanation) view.append(el("p", q.explanation, "mut"));
-    } else {
-      view.append(el("h1", s.phase === "finished" ? "نتیجه‌ی نهایی" : "لیدربورد"));
-      const tb = document.createElement("table");
-      tb.className = "lb";
-      (s.board || []).forEach((p, i) => {
-        const tr = document.createElement("tr");
-        [i + 1, p.name, p.score].forEach(v => {
-          const td = document.createElement("td"); td.textContent = v; tr.append(td);
-        });
-        tb.append(tr);
-      });
-      view.append(tb);
-    }
-  }
-
-  // بخش‌هایی که بدون ساخت دوباره‌ی صفحه به‌روز می‌شن
-  const pc = document.getElementById("pc");
-  if (pc) pc.textContent = s.players + " نفر وارد شدن";
-  if (q && s.phase === "question") {
-    document.getElementById("t").textContent = Math.ceil(q.seconds_left);
-    document.getElementById("b").style.width = (100 * q.seconds_left / q.time_limit) + "%";
-    document.getElementById("a").textContent = "جواب داده‌اند: " + q.answered + " از " + s.players;
-  }
+  if (!built) { build(s); built = true; }
+  document.getElementById("pc").textContent = s.players + " نفر وارد شدن";
 }
 
 async function tick() {
   try { render(await (await fetch(stateUrl)).json()); } catch (e) {}
 }
 tick();
-setInterval(tick, 1000);
+setInterval(tick, 2000);
 </script>
 </body>
 </html>
