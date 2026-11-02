@@ -116,6 +116,34 @@ class AnswerTests(GameTestBase):
         resp = self.send_answer(self.client, self.q1_right)
         self.assertEqual(resp.status_code, 403)
 
+    def test_exact_points_without_speed_bonus(self):
+        self.q1.max_points = 300
+        self.q1.speed_bonus = False
+        self.q1.save()
+        self.open_question()
+        self.session.question_started_at = timezone.now() - timedelta(seconds=15)
+        self.session.save()
+        player, client = self.make_player()
+        self.send_answer(client, self.q1_right)
+        player.refresh_from_db()
+        self.assertEqual(player.score, 300)
+
+    def test_points_per_question_are_independent(self):
+        self.q1.max_points = 200
+        self.q1.save()
+        self.q2.max_points = 700
+        self.q2.save()
+        self.open_question(self.q1)
+        player, client = self.make_player()
+        self.send_answer(client, self.q1_right)
+        first = Player.objects.get(pk=player.pk).score
+        self.assertLessEqual(first, 200)
+        self.open_question(self.q2)
+        self.send_answer(client, self.q2_right)
+        second = Player.objects.get(pk=player.pk).score - first
+        self.assertGreater(second, 350)
+        self.assertLessEqual(second, 700)
+
 
 class StateTests(GameTestBase):
     def test_correct_flag_hidden_during_question(self):

@@ -30,7 +30,10 @@ class Question(models.Model):
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPES, default="none")
     media_file = models.FileField(upload_to="questions/", blank=True)
     time_limit = models.PositiveIntegerField("Time (second)", default=20)
+    max_points = models.PositiveIntegerField("Points", default=1000)
+    speed_bonus = models.BooleanField("Faster answers get more", default=True)
     explanation = models.TextField("Explanation", blank=True)
+
 
     class Meta:
         ordering = ["order", "id"]

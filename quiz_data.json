@@ -1,0 +1,443 @@
+[
+{
+  "model": "contest.quiz",
+  "pk": 2,
+  "fields": {
+    "title": "تست",
+    "description": "تست اولیه",
+    "created_at": "2026-10-25T19:48:05.639Z"
+  }
+},
+{
+  "model": "contest.quiz",
+  "pk": 3,
+  "fields": {
+    "title": "تست نهایی",
+    "description": "این تست نهایی برای این سایت است.",
+    "created_at": "2026-10-29T20:28:15.371Z"
+  }
+},
+{
+  "model": "contest.quiz",
+  "pk": 4,
+  "fields": {
+    "title": "پیکسل یا واقعیت؟",
+    "description": "",
+    "created_at": "2026-11-01T16:15:05.547Z"
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 2,
+  "fields": {
+    "quiz": 2,
+    "order": 1,
+    "text": "این عکس هوش مصنوعی یا انسانی؟",
+    "media_type": "image",
+    "media_file": "questions/Memory_Stack_Overflow_Comic.png",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 3,
+  "fields": {
+    "quiz": 2,
+    "order": 2,
+    "text": "این ویدیو هوش مصنوعی یا انسانی؟",
+    "media_type": "video",
+    "media_file": "questions/document_30752731734.mp4",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 4,
+  "fields": {
+    "quiz": 2,
+    "order": 3,
+    "text": "کدام یک هوش مصنوعی است؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 5,
+  "fields": {
+    "quiz": 3,
+    "order": 1,
+    "text": "این عکس هوش مصنوعی است یا انسانی؟",
+    "media_type": "image",
+    "media_file": "questions/205627.jpg",
+    "time_limit": 20,
+    "explanation": "عکس سمت راست هوش مصنوعی است"
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 6,
+  "fields": {
+    "quiz": 3,
+    "order": 2,
+    "text": "این ویدیو هوش مصنوعی است یا انسانی؟",
+    "media_type": "video",
+    "media_file": "questions/document_30752731734_9ssKoSd.mp4",
+    "time_limit": 20,
+    "explanation": "ویدیو کوتاه است"
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 7,
+  "fields": {
+    "quiz": 3,
+    "order": 3,
+    "text": "کدام عکس هوش مصنوعی است؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 8,
+  "fields": {
+    "quiz": 3,
+    "order": 4,
+    "text": "گزینه انسانی را انتخاب کنید.",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": "گزنیه ای که کلمه انسان را دارد"
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 9,
+  "fields": {
+    "quiz": 4,
+    "order": 1,
+    "text": "کدام عکس ساخته هوش مصنوعی است؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 10,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 10,
+  "fields": {
+    "quiz": 4,
+    "order": 2,
+    "text": "این عکس ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "image",
+    "media_file": "",
+    "time_limit": 7,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 11,
+  "fields": {
+    "quiz": 4,
+    "order": 3,
+    "text": "این ویدیو ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "video",
+    "media_file": "",
+    "time_limit": 14,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 12,
+  "fields": {
+    "quiz": 4,
+    "order": 4,
+    "text": "کدام عکس ساخته هوش مصنوعی نیست؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 8,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 13,
+  "fields": {
+    "quiz": 4,
+    "order": 5,
+    "text": "این صدای انسان است یا هوش مصنوعی؟",
+    "media_type": "audio",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 14,
+  "fields": {
+    "quiz": 4,
+    "order": 6,
+    "text": "این ویدیو ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "video",
+    "media_file": "",
+    "time_limit": 13,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 15,
+  "fields": {
+    "quiz": 4,
+    "order": 7,
+    "text": "کدام عکس ساخته هوش مصنوعی نیست؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 10,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 16,
+  "fields": {
+    "quiz": 4,
+    "order": 8,
+    "text": "کدام عکس ساخته هوش مصنوعی است؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 10,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 17,
+  "fields": {
+    "quiz": 4,
+    "order": 9,
+    "text": "این صدای انسان است یا هوش مصنوعی؟",
+    "media_type": "audio",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 18,
+  "fields": {
+    "quiz": 4,
+    "order": 10,
+    "text": "این ویدیو ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "video",
+    "media_file": "",
+    "time_limit": 20,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 19,
+  "fields": {
+    "quiz": 4,
+    "order": 11,
+    "text": "کدام عکس ساخته هوش مصنوعی است؟",
+    "media_type": "none",
+    "media_file": "",
+    "time_limit": 10,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 20,
+  "fields": {
+    "quiz": 4,
+    "order": 12,
+    "text": "این عکس ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "image",
+    "media_file": "",
+    "time_limit": 7,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.question",
+  "pk": 21,
+  "fields": {
+    "quiz": 4,
+    "order": 13,
+    "text": "این ویدیو ساخته انسان است یا هوش مصنوعی؟",
+    "media_type": "video",
+    "media_file": "",
+    "time_limit": 11,
+    "explanation": ""
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 1,
+  "fields": {
+    "question": 2,
+    "text": "هوش مصنوعی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 2,
+  "fields": {
+    "question": 2,
+    "text": "انسانی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 3,
+  "fields": {
+    "question": 3,
+    "text": "هوش مصنوعی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 4,
+  "fields": {
+    "question": 3,
+    "text": "انسانی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 5,
+  "fields": {
+    "question": 4,
+    "text": "",
+    "media_type": "image",
+    "media_file": "options/463346.jpg",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 6,
+  "fields": {
+    "question": 4,
+    "text": "",
+    "media_type": "image",
+    "media_file": "options/43185.jpg",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 7,
+  "fields": {
+    "question": 5,
+    "text": "هوش مصنوعی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 8,
+  "fields": {
+    "question": 5,
+    "text": "انسانی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 9,
+  "fields": {
+    "question": 6,
+    "text": "هوش مصنوعی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 10,
+  "fields": {
+    "question": 6,
+    "text": "انسانی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 11,
+  "fields": {
+    "question": 7,
+    "text": "",
+    "media_type": "image",
+    "media_file": "options/Memory_Stack_Overflow_Comic.png",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 12,
+  "fields": {
+    "question": 7,
+    "text": "",
+    "media_type": "image",
+    "media_file": "options/43234.jpg",
+    "is_correct": false
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 13,
+  "fields": {
+    "question": 8,
+    "text": "انسانی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": true
+  }
+},
+{
+  "model": "contest.option",
+  "pk": 14,
+  "fields": {
+    "question": 8,
+    "text": "هوش مصنوعی",
+    "media_type": "none",
+    "media_file": "",
+    "is_correct": false
+  }
+}
+]

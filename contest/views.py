@@ -18,7 +18,6 @@ from django.http import HttpResponse
 
 from .models import Answer, Player, Quiz, Session
 
-MAX_POINTS = 1000
 
 def media_dict(file_field, media_type):
     if media_type == "none" or not file_field:
@@ -157,7 +156,10 @@ def answer(request, code):
 
     points = 0
     if option.is_correct:
-        points = int(MAX_POINTS * (0.5 + 0.5 * left / max(q.time_limit, 1)))
+        if q.speed_bonus:
+            points = int(q.max_points * (0.5 + 0.5 * left / max(q.time_limit, 1)))
+        else:
+            points = q.max_points
 
     try:
         with transaction.atomic():

@@ -9,7 +9,8 @@ class OptionInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("quiz", "order", "text", "media_type")
+    list_display = ("quiz", "order", "text", "media_type", "max_points", "speed_bonus")
+    list_editable = ("max_points", "speed_bonus")
     list_filter = ("quiz",)
     inlines = [OptionInline]
 
