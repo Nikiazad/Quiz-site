@@ -88,7 +88,7 @@ class Session(models.Model):
 class Player(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="players")
     name = models.CharField(max_length=40)
-    token = models.CharField(max_length=32, unique=True, default=secrets.token_hex)
+    token = models.CharField(max_length=64, unique=True, default=secrets.token_hex)   
     score = models.PositiveIntegerField(default=0)
     left = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
